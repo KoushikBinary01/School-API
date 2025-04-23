@@ -80,7 +80,7 @@
       const longitude = document.getElementById('longitude').value;
 
       try {
-        const response = await fetch('http://localhost:3000/addSchool', {
+        const response = await fetch('https://school-api-0iou.onrender.com/addSchool', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, address, latitude, longitude })
@@ -96,7 +96,7 @@
     // Function to load nearby schools based on user geolocation
     async function loadSchools() {
       try {
-        const response = await fetch('http://localhost:3000/listSchools?location=' + userLocation);
+        const response = await fetch('https://school-api-0iou.onrender.com/listSchools?location=' + userLocation);
         const data = await response.json();
         
         // Log the data to check its structure

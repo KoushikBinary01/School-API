@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Locator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>School Locator</h1>
+
+    <!-- Location Button to get user geolocation -->
+ <!-- Location Button to get user geolocation -->
+<div id="locationContainer">
+  <button id="setLocation">Use My Location</button>
+</div>
+
+
+    <h2>Add a New School</h2>
+    <form id="schoolForm" style="display:none;">
+      <input type="text" id="name" placeholder="School Name" required>
+      <input type="text" id="address" placeholder="School Address" required>
+      <input type="number" step="any" id="latitude" placeholder="Latitude (optional)" disabled>
+      <input type="number" step="any" id="longitude" placeholder="Longitude (optional)" disabled>
+      <button type="submit">Add School</button>
+    </form>
+
+    <h2>Schools Nearby</h2>
+    <button onclick="loadSchools()" style="display:none;" id="showSchools">Show Schools</button>
+
+    <!-- Table to display schools -->
+    <table id="schoolTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>School Name</th>
+          <th>Address</th>
+          <th>Distance</th>
+        </tr>
+      </thead>
+      <tbody id="schoolList"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let userLocation = null;
+
+    // Handle user click to get their geolocation
+    document.getElementById('setLocation').addEventListener('click', () => {
+      // Check if geolocation is available
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          // Get latitude and longitude from device's geolocation
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          // Display latitude and longitude
+          document.getElementById('latitude').value = lat;
+          document.getElementById('longitude').value = lon;
+
+          // Set user location and enable further actions
+          userLocation = { lat, lon };
+          document.getElementById('schoolForm').style.display = 'block'; // Show the school form
+          document.getElementById('showSchools').style.display = 'block'; // Show the "Show Schools" button
+          alert(`Location set to: Latitude: ${lat}, Longitude: ${lon}`);
+        }, () => {
+          alert('Unable to retrieve location. Please enable location access.');
+        });
+      } else {
+        alert('Geolocation is not supported by your browser.');
+      }
+    });
+
+    document.getElementById('schoolForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const address = document.getElementById('address').value;
+      const latitude = document.getElementById('latitude').value;
+      const longitude = document.getElementById('longitude').value;
+
+      try {
+        const response = await fetch('http://localhost:3000/addSchool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, address, latitude, longitude })
+        });
+
+        const data = await response.json();
+        alert(data.message || data.error);
+      } catch (error) {
+        alert('Error: Could not connect to backend.');
+      }
+    });
+
+    // Function to load nearby schools based on user geolocation
+    async function loadSchools() {
+      try {
+        const response = await fetch('http://localhost:3000/listSchools?location=' + userLocation);
+        const data = await response.json();
+        
+        // Log the data to check its structure
+        console.log(data);
+
+        if (Array.isArray(data.schools)) {
+          const table = document.getElementById('schoolTable');
+          const tbody = document.getElementById('schoolList');
+          tbody.innerHTML = ''; // Clear any previous rows
+
+          // Show the table
+          table.style.display = 'table';
+
+          // Add rows to the table
+          data.schools.forEach(school => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            const addressCell = document.createElement('td');
+            const distanceCell = document.createElement('td');
+
+            nameCell.textContent = school.name;
+            addressCell.textContent = school.address;
+            distanceCell.textContent = school.distance || 'N/A';
+
+            row.appendChild(nameCell);
+            row.appendChild(addressCell);
+            row.appendChild(distanceCell);
+
+            tbody.appendChild(row);
+          });
+        } else {
+          alert('Invalid data format received.');
+        }
+      } catch (error) {
+        alert('Error fetching school list.');
+      }
+    }
+  </script>
+</body>
+</html>

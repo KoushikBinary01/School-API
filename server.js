@@ -87,6 +87,11 @@ const ip = rawIP === '::1' || rawIP === '127.0.0.1' ? '8.8.8.8' : rawIP; // use 
 
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log('Server is listening on port 3000');
+
+  // Fetch a website every 5 seconds (5000 milliseconds)
+  setInterval(() => {
+    fetch('https://school-api-0iou.onrender.com')
+  },840000);
 });

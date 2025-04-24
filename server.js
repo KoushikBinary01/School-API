@@ -87,7 +87,7 @@ const ip = rawIP === '::1' || rawIP === '127.0.0.1' ? '8.8.8.8' : rawIP; // use 
 
 
 // Start server
-app.listen(port, () => {
+app.listen(PORT, () => {
   console.log('Server is listening on port 3000');
 
   // Fetch a website every 5 seconds (5000 milliseconds)
